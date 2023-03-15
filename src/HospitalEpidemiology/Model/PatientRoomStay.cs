@@ -8,7 +8,12 @@ namespace HospitalEpidemiology.Model;
 public class PatientRoomStay
 {
     int id;
+
     public required Patient Patient { get; set; }
+    public int PatientId { get; set; }
+
     public required Room Room { get; set; }
+    public int RoomId { get; set; }
+
     public required NpgsqlRange<DateTime> Stay { get; set; }
 }
