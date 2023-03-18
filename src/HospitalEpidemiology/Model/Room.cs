@@ -8,5 +8,4 @@ public class Room
 
     public required Unit Unit { get; set; }
     public List<BedLocation> BedLocations { get; set; } = new();
-    public List<PatientRoomStay> PatientStays { get; set; } = new();
 }

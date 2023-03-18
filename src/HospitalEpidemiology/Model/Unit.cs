@@ -11,5 +11,4 @@ public class Unit
 
     public required Hospital Hospital { get; set; }
     public List<Room> Rooms { get; set; } = new();
-    public List<PatientUnitStay> PatientStays { get; set; } = new();
 }

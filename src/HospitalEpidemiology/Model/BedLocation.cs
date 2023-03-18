@@ -8,5 +8,4 @@ public class BedLocation
     public string? Description { get; set; }
 
     public required Room Room { get; set; }
-    public List<PatientBedLocationStay> PatientStays { get; set; } = new();
 }

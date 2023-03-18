@@ -1,4 +1,5 @@
 ﻿using System;
+using HospitalEpidemiology.Model;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
@@ -13,6 +14,9 @@ namespace HospitalEpidemiology.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:his_location_type", "bed_location,room,unit,hospital");
+
             migrationBuilder.CreateTable(
                 name: "hospitals",
                 columns: table => new
@@ -63,33 +67,6 @@ namespace HospitalEpidemiology.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "patient_unit_stays",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
-                    patient_id = table.Column<int>(type: "integer", nullable: false),
-                    unit_id = table.Column<int>(type: "integer", nullable: false),
-                    stay = table.Column<NpgsqlRange<DateTime>>(type: "tstzrange", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_patient_unit_stays", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_patient_unit_stays_patients_patient_id",
-                        column: x => x.patient_id,
-                        principalTable: "patients",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_patient_unit_stays_units_unit_id",
-                        column: x => x.unit_id,
-                        principalTable: "units",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "rooms",
                 columns: table => new
                 {
@@ -117,6 +94,7 @@ namespace HospitalEpidemiology.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
                     code = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: true),
                     description = table.Column<string>(type: "text", nullable: true),
                     room_id = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -132,53 +110,67 @@ namespace HospitalEpidemiology.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "patient_room_stays",
+                name: "his_locations",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
-                    patient_id = table.Column<int>(type: "integer", nullable: false),
-                    room_id = table.Column<int>(type: "integer", nullable: false),
-                    stay = table.Column<NpgsqlRange<DateTime>>(type: "tstzrange", nullable: false)
+                    type = table.Column<HisLocationType>(type: "his_location_type", nullable: false),
+                    bed_location_id = table.Column<int>(type: "integer", nullable: true),
+                    hospital_id = table.Column<int>(type: "integer", nullable: true),
+                    room_id = table.Column<int>(type: "integer", nullable: true),
+                    unit_id = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_patient_room_stays", x => x.id);
+                    table.PrimaryKey("pk_his_locations", x => x.id);
                     table.ForeignKey(
-                        name: "fk_patient_room_stays_patients_patient_id",
-                        column: x => x.patient_id,
-                        principalTable: "patients",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_patient_room_stays_rooms_room_id",
-                        column: x => x.room_id,
-                        principalTable: "rooms",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "patient_bed_location_stays",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
-                    patient_id = table.Column<int>(type: "integer", nullable: false),
-                    bed_location_id = table.Column<int>(type: "integer", nullable: false),
-                    stay = table.Column<NpgsqlRange<DateTime>>(type: "tstzrange", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_patient_bed_location_stays", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_patient_bed_location_stays_bed_locations_bed_location_id",
+                        name: "fk_his_locations_bed_locations_bed_location_id",
                         column: x => x.bed_location_id,
                         principalTable: "bed_locations",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_patient_bed_location_stays_patients_patient_id",
+                        name: "fk_his_locations_hospitals_hospital_id",
+                        column: x => x.hospital_id,
+                        principalTable: "hospitals",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_his_locations_rooms_room_id",
+                        column: x => x.room_id,
+                        principalTable: "rooms",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_his_locations_units_unit_id",
+                        column: x => x.unit_id,
+                        principalTable: "units",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "patient_stays",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
+                    patient_id = table.Column<int>(type: "integer", nullable: false),
+                    his_location_id = table.Column<int>(type: "integer", nullable: false),
+                    stay = table.Column<NpgsqlRange<DateTime>>(type: "tstzrange", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_patient_stays", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_patient_stays_his_locations_his_location_id",
+                        column: x => x.his_location_id,
+                        principalTable: "his_locations",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_patient_stays_patients_patient_id",
                         column: x => x.patient_id,
                         principalTable: "patients",
                         principalColumn: "id",
@@ -191,34 +183,34 @@ namespace HospitalEpidemiology.Migrations
                 column: "room_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_patient_bed_location_stays_bed_location_id",
-                table: "patient_bed_location_stays",
+                name: "ix_his_locations_bed_location_id",
+                table: "his_locations",
                 column: "bed_location_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_patient_bed_location_stays_patient_id",
-                table: "patient_bed_location_stays",
-                column: "patient_id");
+                name: "ix_his_locations_hospital_id",
+                table: "his_locations",
+                column: "hospital_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_patient_room_stays_patient_id",
-                table: "patient_room_stays",
-                column: "patient_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_patient_room_stays_room_id",
-                table: "patient_room_stays",
+                name: "ix_his_locations_room_id",
+                table: "his_locations",
                 column: "room_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_patient_unit_stays_patient_id",
-                table: "patient_unit_stays",
-                column: "patient_id");
+                name: "ix_his_locations_unit_id",
+                table: "his_locations",
+                column: "unit_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_patient_unit_stays_unit_id",
-                table: "patient_unit_stays",
-                column: "unit_id");
+                name: "ix_patient_stays_his_location_id",
+                table: "patient_stays",
+                column: "his_location_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_patient_stays_patient_id",
+                table: "patient_stays",
+                column: "patient_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_rooms_unit_id",
@@ -235,19 +227,16 @@ namespace HospitalEpidemiology.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "patient_bed_location_stays");
+                name: "patient_stays");
 
             migrationBuilder.DropTable(
-                name: "patient_room_stays");
-
-            migrationBuilder.DropTable(
-                name: "patient_unit_stays");
-
-            migrationBuilder.DropTable(
-                name: "bed_locations");
+                name: "his_locations");
 
             migrationBuilder.DropTable(
                 name: "patients");
+
+            migrationBuilder.DropTable(
+                name: "bed_locations");
 
             migrationBuilder.DropTable(
                 name: "rooms");

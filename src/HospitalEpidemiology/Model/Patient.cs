@@ -7,8 +7,6 @@ public class Patient
     public required string FamilyName { get; set; }
     public required string GivenName { get; set; }
     public required DateOnly Birthdate { get; set; }
-    
-    public List<PatientBedLocationStay> BedLocationStays { get; set; } = new();
-    public List<PatientRoomStay> RoomStays { get; set; } = new();
-    public List<PatientUnitStay> UnitStays { get; set; } = new();
+
+    public List<PatientStay> Stays { get; } = new();
 }
